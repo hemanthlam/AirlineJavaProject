@@ -15,10 +15,34 @@ import java.util.regex.Pattern;
  * -README gives the detailed description about the project that can be used in command line
  * After entering the flight details, we can use -print to get the details clearly.
  */
-public class Project1 {
+public class Project2 {
 
   public static void main(String[] args) throws ParseException {
-//The required variables are declared here.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //The required variables are declared here.
     int flightNumber;
     String name;
     String src;

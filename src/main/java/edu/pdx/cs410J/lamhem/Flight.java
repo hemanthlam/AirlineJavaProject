@@ -5,7 +5,7 @@ import edu.pdx.cs410J.AbstractFlight;
 /**
  * Created by hemanth on 7/12/2017.
  * This is a Flight class where Flight number, Source, Depart Time, destination, Arrival Time are given
- * This in turn returns the details to Project1, the main class.
+ * This in turn returns the details to Project2, the main class.
  */
 public class Flight extends AbstractFlight {
 
