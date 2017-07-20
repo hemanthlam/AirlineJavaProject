@@ -13,6 +13,9 @@ import java.util.Collection;
 public class Airline extends AbstractAirline {
     String name;
     ArrayList<AbstractFlight> flightList;
+Airline(String name){
+    this.name = name;
+}
 
     Airline(String name, Flight flight){ // Constructor has been declared
         this.name=name;

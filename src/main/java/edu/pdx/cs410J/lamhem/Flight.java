@@ -14,6 +14,7 @@ public class Flight extends AbstractFlight {
   String departTime;
   String dest;
   String arriveTime;
+
 // A constructor is declared
   Flight(int flightIdentificationNumber, String src,String departTime,String dest, String arriveTime){
     this.flightIdentificationNumber = flightIdentificationNumber;

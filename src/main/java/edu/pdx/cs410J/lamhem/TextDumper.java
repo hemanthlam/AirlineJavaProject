@@ -25,7 +25,8 @@ public class TextDumper implements AirlineDumper<Airline> {
         ArrayList<Flight> list = (ArrayList<Flight>) airline.getFlights();
         for (Flight flight : list) {
             fw.write("\n");
-            fw.write(flight.getNumber()+"  "+flight.getSource()+"  "+flight.getDeparture()+"  "+flight.getDestination()+"  "+flight.getDestination());
+            fw.write(flight.getNumber()+",  "+flight.getSource()+",  "+flight.getDeparture()+",  "+
+                    flight.getDestination()+",  "+flight.getDestination());
         }
         fw.flush();
         fw.close();
