@@ -1,5 +1,6 @@
 package edu.pdx.cs410J.lamhem;
 
+import edu.pdx.cs410J.AbstractAirline;
 import edu.pdx.cs410J.AirlineParser;
 import edu.pdx.cs410J.ParserException;
 
@@ -10,93 +11,101 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//Class TextParser that implements the edu.pdx.cs410J.AirlineParser interface. A TextParser
-  //      reads the contents of a text file and from it creates an airline with its associated flights
+/**Class TextParser that implements the edu.pdx.cs410J.AirlineParser interface.
+ * A TextParser reads the contents of a text file,
+ * from it creates an airline with its associated flights.*/
 
-public class TextParser implements AirlineParser<Airline> {
-    File file;
+public class TextParser implements AirlineParser {
+    private String filename;
+    private String name;
+    public Airline airline;
 
+    /** parse method is acquired from the AirlineParser interface and is implemented here */
     @Override
-    public Airline parse() throws ParserException {
-        String[] flightdetails = new String[8];
-        int i = 0;
-        Airline airline = null;
-        Flight flight;
+    public AbstractAirline parse() throws ParserException {
+        System.out.println("Adding Flights to the File after reading");
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            StringTokenizer st = new StringTokenizer(br.readLine(), ",  ");
-            while (st.hasMoreTokens()) {
-                flightdetails[i] = st.nextToken();
-                i++;
-            }
-            String name = flightdetails[0];
-            //Check if the name contains only numbers and letters else it should show error message
-            Pattern p = Pattern.compile("[^a-zA-Z0-9 ]", Pattern.CASE_INSENSITIVE);
-            Matcher m = p.matcher(flightdetails[0]);
-            boolean checkName = m.find();
-            if(checkName){
-                System.out.println("Please try again .. The Name should contain only numbers and letters");
-                System.exit(1);
-            }
-            int flightNumber = Integer.parseInt(flightdetails[1]);
-            String src = flightdetails[2];
-            //Check to see the Airport codes should be only 3 letters in both Source and Destination
-            int flag = 0;
-            for (int j = 0; j < src.length(); j++) {
-                if (Character.isLetter(src.charAt(j)))
-                    flag++;
-            }
-            if (flag != 3) {
-                throw new IllegalArgumentException("Source and Destination Airport codes should contain 3 letters, Please re-try!");
-            }
-            String departTime = flightdetails[3] + " " + flightdetails[4];
-            String dest = flightdetails[5];
-            flag = 0;
-            for (int j = 0; j < dest.length(); j++) {
-                if (Character.isLetter(dest.charAt(j)))
-                    flag++;
-            }
-            if (flag != 3) {
-                throw new IllegalArgumentException("Source and Destination Airport codes should contain 3 letters, Please re-try!");
-            }
-            String arriveTime = flightdetails[6] + " " + flightdetails[7];
-            checkValidDate(departTime);
-            checkValidDate(arriveTime);
-            flight = new Flight(flightNumber, src, departTime, dest, arriveTime);
-            airline = new Airline(name, flight);
-            System.out.println(airline);
-            System.out.println(flight);
+            File file= new File(filename);
+            FileReader fr = new FileReader(filename);
+            BufferedReader bufferedReader = new BufferedReader(fr);
+            String intermediate;
+            if(file.exists()) {
+                String name = bufferedReader.readLine();
+                airline = new Airline(name);
 
-        } catch (IOException ex) {
-            throw new ParserException("While parsing text", ex);
-        } catch (ParseException e) {
-            e.printStackTrace();
+                if (name.equalsIgnoreCase(name)) {
+                    while ((intermediate = bufferedReader.readLine()) != null)
+                    {
+                        String[] split = intermediate.split(",");
+                        String number = split[0];
+                        String src = split[1];
+                        String dept = split[2];
+                        String[] dsplit = dept.split(" ");
+                        String dest = split[3];
+                        String arrive = split[4];
+                        String[] asplit = arrive.split(" ");
+
+                        /**Date and Time should be in the format: mm/dd/yyyy hh:mm*/
+                        if(!dsplit[0].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)")||
+                                !asplit[0].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)"))
+                            throw new IllegalArgumentException("Please enter date and time in valid format...");
+                        if(!dsplit[1].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")||
+                                !asplit[1].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]"))
+                            throw new IllegalArgumentException("Please enter date and time in valid format...");
+                        /** Airline Name should be only Letters or numbers*/
+                        Pattern p = Pattern.compile("[^a-zA-Z0-9 ]", Pattern.CASE_INSENSITIVE);
+                        Matcher m = p.matcher(name);
+                        boolean b = m.find();
+                        if (b) {
+                            System.out.println("Please try again .. The Name should contain only numbers and letters");
+                        }
+
+                        /**Source and Destination Airport names should be only 3 letters */
+                        int flag=0;
+                        for (int i = 0; i < src.length(); i++)
+                        {
+                            if (Character.isLetter(src.charAt(i)))
+                                flag++;
+                        }
+                        if (flag!=3)
+                            System.out.println("Source Airport codes should contain 3 letters, Please re-try!");
+
+                        flag=0;
+                        for (int i = 0; i < dest.length(); i++)
+                        {
+                            if (Character.isLetter(dest.charAt(i)))
+                                flag++;
+                        }
+                        if (flag!=3)
+                            System.out.println("Destination Airport codes should contain 3 letters, Please re-try!");
+                        Flight f = new Flight(Integer.parseInt(number), src, dept, dest, arrive);
+                        airline.addFlight(f);
+                    }
+                    bufferedReader.close();
+                }else {
+                    System.out.println(filename + "doesn't match");
+                    System.exit(1);
+                }
+            }else
+            {
+                System.out.println("File doesn't exist");
+            }
+        }catch(FileNotFoundException ex) {
+            System.out.println("Unable to open file");
         }
-
+        catch(IOException ex) {
+            System.out.println("File must be corrupted");
+        } catch (Exception e) {
+            System.out.println("Unexpected error." + " Please see -README to understand");
+        }
         return airline;
     }
 
-    void getFileName(File file) throws IOException {
-        this.file=file;
-    }
-
-    private static void checkValidDate(String parsedate) throws ParseException {
-        try {
-            if (parsedate == null || !(parsedate.matches("^\\d{1,2}/\\d{1,2}/\\d{4} \\d{1,2}:\\d{2}$"))) {
-                System.out.println("Please enter date and time in valid format...");
-                System.exit(1);
-            }
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm"); //Validate Date time format
-            dateFormat.setLenient(false);
-            dateFormat.parse(parsedate);
-        }
-        catch (ParseException e) {
-            System.out.println("Invalid Date or Time Formats, Please try again");
-            System.exit(1);
-        }
-        catch (Exception e) {
-            System.out.println("An exception have occured, please use -README command to understand");
-            System.exit(1);
-        }
+    /**
+     Getter method for the filename is created which takes filename and name
+     */
+    void getFileName(String s, String name) {
+        this.filename = s;
+        this.name = name;
     }
 }

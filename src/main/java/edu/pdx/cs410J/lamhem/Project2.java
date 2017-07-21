@@ -8,207 +8,336 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The main class for the CS410J airline Project
+ * The main class for the CS410J airline Project2
  * Here the program takes arguments from the command line
  * -README gives the detailed description about the project that can be used in command line
  * After entering the flight details, we can use -print to get the details clearly.
+ * -textFile File name to store the flight details
  */
 public class Project2 {
-
-  public static void main(String[] args) throws ParseException {
-
-    // Class c = AbstractAppointmentBook.class;  // Refer to one of Dave's classes so that we can be sure it is on the classpath
-    //System.err.println("Missing command line arguments");
-    Airline airline;
-    Flight flight;
-    List<String> argList = new ArrayList(); // arglist stores appointment details entered through command line
+  public static void main(String[] args) {
+    int flightNumber;
+    String name;
+    String src;
+    String dest;
+    String arriveTime;
+    String departTime;
+    String fileName;
+    AbstractAirline<Flight> airline = null;
+    AbstractAirline airline1;
+    Flight flight1;
     TextDumper textDumper = new TextDumper();
     TextParser textParser = new TextParser();
-    String fileName = null;
-    boolean printFlag = false;
 
-
-    for (String arg : args) argList.add(arg);
-
-    if (argList.contains("-README")) {
-      System.out.println("\nREADME FILE - PROJECT 2 - POOJA MANE\n" +
-              "This project is used to create appointment book for owner including appointment details entered through commandline.\n" +
-              "and optionally creating text file for that appointmentbook\n"+
-              "usage: java edu.pdx.cs410J.<login-id>.Project1 [options] <args>\n" +
-              "args are (n this order):\n" +
-              "owner -The person whose owns the appointment book\n" +
-              "description- A description of the appointment\n" +
-              "beginTime- When the appointment begins (24-hour time)\n" +
-              "endTime- When the appointment ends (24-hour time)\n" +
-              "options are (options may appear in any order):\n" +
-              "-print Prints a description of the new appointment\n" +
-              "-README Prints a README for this project and exits\n" +
-              "-textFile file creates text file for appointment book\n"+
-              "Date and time should be in the format: mm/dd/yyyy hh:mm\n" +
-              "Description should not be empty\n" +
-              "If -print and appointment details are specified it prints appointment description");
-      System.exit(1);
-    }
+    boolean boo = false;
     try {
-      for (int i = 0; i <= 1; i++) {
-        if (argList.get(i).contentEquals("-textFile") && !(argList.get(i + 1).startsWith("-"))) {
-          fileName = argList.get(i+1);
-          break;
+      for (String arg : args) {
+        if (arg.contains("-README")) {
+          boo = true;
         }
       }
 
-      if(argList.contains("-textFile") && fileName == null)
+      if (boo == true)
       {
-        System.out.println("Invalid Arguments ..Text file name not provided.. Please try again");
+        System.out.println("\nREADME FILE for PROJECT 1 by HEMANTH LAM\n" +
+                "This project will create boo fundamental Airline and Flight classes\n" +
+                "args are (in this order):\n" +
+                "name The name of the airline\n" + "flightNumber The flight number\n" +
+                "src Three-letter code of departure airport\n" +
+                "departTime Departure date and time (24-hour time)\n" +
+                "dest Three-letter code of arrival airport\n" +
+                "arriveTime Arrival date and time (24-hour time)\n" +
+                "options are (options may appear in any order): \n" +
+                "-print Prints boo description of the new flight \n" +
+                "-README Prints boo README for this project and exits\n" +
+                "Date and time should be in the format: mm/dd/yyyy hh:mm\n" +
+                "Please follow the instructions!!\n \n" +
+                "-print needs to be given only After entering the flight details");
         System.exit(1);
-      }
-
-      if (argList.size() == 2 && (fileName != null)){
-        System.out.println("Invalid arguments .. appointment details not specified");
-        System.exit(1);
-      }
-
-      if (argList.size() == 11 && (fileName != null) && ((argList.get(0).contentEquals("-print")) || (argList.get(2).contentEquals("-print")))) {
-        argList.remove(0);
-        argList.remove(0);
-        argList.remove(0);
-        printFlag = true;
-      }
-
-      if (argList.size() == 10 && (fileName != null) && !(argList.get(0).contentEquals("-print"))) {
-        argList.remove(0);
-        argList.remove(0);
-
-      }
-      if ((argList.size() == 9 && argList.get(0).equals("-print"))) {
-        argList.remove(0);
-        printFlag = true;
-      }
-      if ((argList.size() == 8) && !(argList.get(0).equals("-print"))) {
-
-        //if dates are invalid format and description is not empty creates appointment book with specified appointment
-        // checkValidDate(argList.get(2) + " " + argList.get(3));
-        //checkValidDate(argList.get(4) + " " + argList.get(5));
-
-        // check for description is not empty
-        if ((!(argList.get(1).trim().isEmpty()))) {
-
-          String name = argList.get(0);
-          int flightNumber = Integer.parseInt(argList.get(1));
-          String src = argList.get(2);
-          String departTime = argList.get(3) + " " + argList.get(4);
-          String dest = argList.get(5);
-          String arriveTime = argList.get(6) + " " + argList.get(7);
-
-          flight = new Flight(flightNumber, src, departTime, dest, arriveTime);
-          airline = new Airline(name);
-          airline.addFlight(flight);
-
-          if (printFlag)
-            System.out.println(flight);
-
-          if(fileName==null && !(printFlag)) {
-            System.out.println(airline);
-            System.out.println(flight);
-          }
-
-          if (fileName != null) {
-
-            File file = new File(fileName);
-            Airline appointmentBook1;
-            if(file.exists())
-            {
-              FileInputStream fstream = new FileInputStream(file);
-              BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
-              String ownerName = br.readLine();
-              if ((airline.getName() != null && airline.getName().equalsIgnoreCase(ownerName))) {
-                textDumper.getFileName(file);
-                textParser.getFileName(file);
-                appointmentBook1=textParser.parse(); //Read file and create Appointmentbook using parse()
-                appointmentBook1.addFlight(flight); // Add appointment to created Appointmentbook
-                textDumper.dump(appointmentBook1); //Write back Appointmentbook to file
-                System.out.println("Appointmentbook has been created and added to file..");
-                System.out.println(appointmentBook1);
-              }
-              else {
-                System.out.println("Files are different ..Please try again");
-                System.exit(1);
-              }
-            }
-            else
-            {
-              file.createNewFile();
-              textDumper.getFileName(file);
-              textDumper.dump(airline);
-              System.out.println("Appointmentbook has been created and added to file..");
-              System.out.println(airline);
-            }
-
-
-          }
-
-        } else
-          throw new Exception("Empty string in description.. Please try again");
-      } else
-        throw new Exception(" ");
-    } catch (IOException e) {
-      System.out.println("Bad format of data..");
-    } catch (ParseException e) {
-      System.out.println("Invalid Date Formats .. Please try again");
-    }catch (ParserException e)        {
-      System.out.println("Error while parsing files.. Please try again");
-    }catch (StringIndexOutOfBoundsException e){
-      System.out.println("Data Malformed in text file,unable to parse.. Please try again");
-    }
-    catch (Exception e) {
-      if (e.getMessage().equalsIgnoreCase("Empty string in description.. Please try again")) {
-        System.out.println(e.getMessage());
       } else {
-        System.out.println("Invalid arguments .. Please try again");
+        if ((args.length == 11) && (args[0].contentEquals("-textFile")) && !(args[1].startsWith("-")) && (args[2].contentEquals("-print")))
+        {
+          fileName = args[1];
+          if(!args[6].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)")||!args[9].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+          if(!args[7].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")||!args[10].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+
+
+          Pattern p = Pattern.compile("[^a-zA-Z0-9 ]", Pattern.CASE_INSENSITIVE);
+          Matcher m = p.matcher(args[3]);
+          boolean b = m.find();
+          if (b) {
+            System.out.println("Please try again .. The Name should contain only numbers and letters");
+          }
+
+          int flag=0;
+          for (int i = 0; i < args[5].length(); i++)
+          {
+            if (Character.isLetter(args[5].charAt(i)))
+              flag++;
+          }
+          if (flag!=3)
+            System.out.println("Source Airport codes should contain 3 letters, Please re-try!");
+
+          flag=0;
+          for (int i = 0; i < args[8].length(); i++)
+          {
+            if (Character.isLetter(args[8].charAt(i)))
+              flag++;
+          }
+          if (flag!=3)
+            System.out.println("Destination Airport codes should contain 3 letters, Please re-try!");
+
+          if (true) {
+            try {
+              File file = new File(fileName);
+              if (file.exists()) {
+                System.out.println("File already exists!!");
+                name = args[3];
+                textParser.getFileName(fileName, name);
+                airline = textParser.parse();
+                flight1 = new Flight(Integer.parseInt(args[4]), args[5], args[6] + " " + args[7], args[8] ,args[9] + " " + args[10]);
+                airline.addFlight(flight1);
+                textDumper.getFileName(fileName);
+                textDumper.dump(airline);
+                System.out.println(flight1);
+              } else {
+                file.createNewFile();
+                System.out.println("Created a new file");
+                airline = new Airline(args[3]);
+                //name = args[3];
+                flight1 = new Flight(Integer.parseInt(args[4]), args[5], args[6] + " " + args[7], args[8] ,args[9] + " " + args[10]);
+                airline.addFlight(flight1);
+                System.out.println(airline);
+                textDumper.getFileName(fileName);
+                textDumper.dump(airline);
+                System.out.println(flight1);
+              }
+            } catch (FileNotFoundException filename) {
+              System.out.println("File not found");
+            } catch (ParserException e) {
+              System.out.println("Parsing Exception have occurred");
+              e.printStackTrace();
+            } catch (IOException e) {
+              System.out.println("IO Exception is occurred");
+              e.printStackTrace();
+            }
+          }
+        }
+
+        if ((args.length == 11) && (args[0].contentEquals("-print") && (args[1].contentEquals("-textFile")) && !(args[2].startsWith("-"))))
+        {
+          fileName = args[2];
+          //to check the format of date and time
+          if(!args[6].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)")||!args[9].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+          if(!args[7].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")||!args[10].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+
+          Pattern p = Pattern.compile("[^a-zA-Z0-9 ]", Pattern.CASE_INSENSITIVE);
+          Matcher m = p.matcher(args[3]);
+          boolean b = m.find();
+          if (b) {
+            System.out.println("Please try again .. The Name should contain only numbers and letters");
+          }
+
+
+          int flag1=0;
+          for (int i = 0; i < args[5].length(); i++)
+          {
+            if (Character.isLetter(args[5].charAt(i)))
+              flag1++;
+          }
+          if (flag1!=3)
+            System.out.println("Source Airport codes should contain 3 letters, Please re-try!");
+
+          //to check number of letters in the name of the destination airport 
+          flag1=0;
+          for (int i = 0; i < args[8].length(); i++)
+          {
+            if (Character.isLetter(args[8].charAt(i)))
+              flag1++;
+          }
+          if (flag1!=3)
+            System.out.println("Destination Airport codes should contain 3 letters, Please re-try!");
+
+          if (true) {
+            try {
+              File file = new File(fileName);
+
+              if (file.exists()) {
+                System.out.println("File exists!!");
+                name = args[3];
+                textParser.getFileName(fileName, name);
+                airline = textParser.parse();
+                flight1 = new Flight(Integer.parseInt(args[4]), args[5], args[6] + " " + args[7], args[8] ,args[9] + " " + args[10]);
+                airline.addFlight(flight1);
+                textDumper.getFileName(fileName);
+                textDumper.dump(airline);
+                System.out.println(flight1);
+
+              } else {
+                file.createNewFile();
+                System.out.println("Created a new file");
+                airline = new Airline(args[3]);
+                //name = args[3];
+                flight1 = new Flight(Integer.parseInt(args[4]), args[5], args[6] + " " + args[7], args[8] ,args[9] + " " + args[10]);
+                airline.addFlight(flight1);
+                System.out.println(airline);
+                textDumper.getFileName(fileName);
+                textDumper.dump(airline);
+                System.out.println(flight1);
+              }
+            } catch (FileNotFoundException filename) {
+              System.out.println("File not found");
+            } catch (ParserException e) {
+              System.out.println("Parsing Exception have occurred");
+              e.printStackTrace();
+            } catch (IOException e) {
+              System.out.println("IO Exception is occurred");
+              e.printStackTrace();
+            }
+          }
+        }
+
+        else if((args.length == 10)  && (args[0].contentEquals("-textFile")) && (!(args[1].startsWith("-")))) {
+          fileName = args[1];
+
+          if (!args[5].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)") || !args[8].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+          if (!args[6].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]") || !args[9].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+
+          //to check if airline name consists of any special characters
+          Pattern p = Pattern.compile("[^a-zA-Z0-9 ]", Pattern.CASE_INSENSITIVE);
+          Matcher m = p.matcher(args[2]);
+          boolean b = m.find();
+          if (b) {
+            System.out.println("Please try again .. The Name should contain only numbers and letters");
+          }
+
+          //to check number of letters in the name of the source airport 
+          int flag3 = 0;
+          for (int i = 0; i < args[4].length(); i++) {
+            if (Character.isLetter(args[4].charAt(i)))
+              flag3++;
+          }
+          if (flag3 != 3)
+            System.out.println("Source Airport codes should contain 3 letters, Please re-try!");
+
+          //to check number of letters in the name of the destination airport 
+          flag3 = 0;
+          for (int i = 0; i < args[7].length(); i++) {
+            if (Character.isLetter(args[7].charAt(i)))
+              flag3++;
+          }
+          if (flag3 != 3)
+            System.out.println("Destination Airport codes should contain 3 letters, Please re-try!");
+
+          if (true) {
+            try {
+              File file = new File(fileName);
+
+              if (file.exists()) {
+                System.out.println("File exits!!");
+                name = args[2];
+                textParser.getFileName(fileName, name);
+                airline = textParser.parse();
+                flight1 = new Flight(Integer.parseInt(args[3]), args[4], args[5] + " " + args[6], args[7], args[8] + " " + args[9]);
+                airline.addFlight(flight1);
+                textDumper.getFileName(fileName);
+                textDumper.dump(airline);
+
+              } else {
+                file.createNewFile();
+                System.out.println("Created a new file");
+                airline = new Airline(args[2]);
+                airline.addFlight(new Flight(Integer.parseInt(args[3]), args[4], args[5] + " " + args[6], args[7], args[8] + " " + args[9]));
+                textDumper.getFileName(fileName);
+                textDumper.dump(airline);
+              }
+            } catch (FileNotFoundException filename) {
+              System.out.println("file not found");
+            } catch (ParserException e) {
+              System.out.println("Parsing Exception have occurred");
+              e.printStackTrace();
+            } catch (IOException e) {
+              System.out.println("IO Exception is occurred");
+              e.printStackTrace();
+            }
+          }
+        }
+
+        else if((args.length == 9)  && (args[0].equals("-print"))){
+
+          //to check the format of date and time
+          if(!args[4].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)")||!args[7].matches("(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/((19|20)\\d\\d)"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+          if(!args[5].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]")||!args[8].matches("([01]?[0-9]|2[0-3]):[0-5][0-9]"))
+            throw new IllegalArgumentException("Please enter date and time in valid format...");
+
+          //to check if airline name consists of any special characters
+          Pattern p = Pattern.compile("[^a-zA-Z0-9 ]", Pattern.CASE_INSENSITIVE);
+          Matcher m = p.matcher(args[1]);
+          boolean b = m.find();
+          if (b) {
+            System.out.println("Please try again .. The Name should contain only numbers and letters");
+          }
+
+          //to check number of letters in the name of the source airport 
+          int counter1=0;
+          for (int i = 0; i < args[3].length(); i++)
+          {
+            if (Character.isLetter(args[3].charAt(i)))
+              counter1++;
+          }
+          if (counter1!=3)
+            System.out.println("Source Airport codes should contain 3 letters, Please re-try!");
+
+          //to check number of letters in the name of the destination airport 
+          int counter2=0;
+          for (int i = 0; i < args[6].length(); i++)
+          {
+            if (Character.isLetter(args[6].charAt(i)))
+              counter2++;
+          }
+          if (counter2!=3)
+            System.out.println("Destination Airport codes should contain 3 letters, Please re-try!");
+
+          if (true) {
+            airline = new Airline(args[1]);
+            flight1 = new Flight(Integer.parseInt(args[2]), args[3], args[4] + " " + args[5], args[6] ,args[7] + " " + args[8]);
+            airline.addFlight(flight1);
+            if (args[0].contentEquals("-print")) {
+              System.out.println("Airline name : " + airline.getName());
+              System.out.println(flight1.toString());
+            }
+          }
+        }
+
+        else if(args.length==8 ){
+          for (String arg : args) {
+            System.out.println(arg);
+          }
+          System.out.println("No options are given.");
+        }
+
+        else if(args.length<8)
+        {
+          System.out.println("Not enough args... Please see -README and try again!!");
+        }
       }
+    }  catch (IllegalArgumentException e) {
+      System.out.println("Invalid Arguments\n" + e.getMessage());
+      System.exit(1);
     }
     System.exit(1);
   }
-//Implemented the README method
-  private static void README() {
-    System.out.println("\nREADME FILE for PROJECT 1 by HEMANTH LAM\n" +
-            "This project will create a fundamental Airline and Flight classes\n" +
-            "args are (in this order):\n" +
-            "name The name of the airline\n" + "flightNumber The flight number\n" +
-            "src Three-letter code of departure airport\n" +
-            "departTime Departure date and time (24-hour time)\n" +
-            "dest Three-letter code of arrival airport\n" +
-            "arriveTime Arrival date and time (24-hour time)\n" +
-            "options are (options may appear in any order): \n" +
-            "-print Prints a description of the new flight \n" +
-            "-README Prints a README for this project and exits\n" +
-            "Date and time should be in the format: mm/dd/yyyy hh:mm\n" +
-            "Please follow the instructions!!\n \n" +
-            "-print needs to be given only After entering the flight details");
-  }
 
-//Implemented the checkValidDate Method
- private static void checkValidDate(String parsedate) throws ParseException {
-    try {
-      if (parsedate == null || !(parsedate.matches("^\\d{1,2}/\\d{1,2}/\\d{4} \\d{1,2}:\\d{2}$"))) {
-        System.out.println("Please enter date and time in valid format...");
-        System.exit(1);
-      }
-      SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm"); //Validate Date time format
-      dateFormat.setLenient(false);
-      dateFormat.parse(parsedate);
-    }
-    catch (ParseException e) {
-      System.out.println("Invalid Date or Time Formats, Please try again");
-      System.exit(1);
-    }
-    catch (Exception e) {
-      System.out.println("An exception have occured, please use -README command to understand");
-      System.exit(1);
-    }
-  }
 }
